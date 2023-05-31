@@ -103,10 +103,10 @@ java {
 stutter {
     isSparse = (findProperty("stutter.sparce")?.toString()?.toBoolean()) ?: true
     java(8) {
-        compatibleRange("6.0")
+        compatibleRange("6.2")
     }
     java(11) {
-        compatibleRange("6.0")
+        compatibleRange("6.2")
     }
     java(17) {
         compatibleRange("7.3")

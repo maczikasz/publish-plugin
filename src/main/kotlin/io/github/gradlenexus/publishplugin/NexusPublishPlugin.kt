@@ -33,6 +33,7 @@ import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.invoke
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.register
+import org.gradle.kotlin.dsl.the
 import org.gradle.kotlin.dsl.typeOf
 import org.gradle.kotlin.dsl.withType
 import org.gradle.util.GradleVersion
@@ -50,8 +51,8 @@ class NexusPublishPlugin : Plugin<Project> {
             "Plugin must be applied to the root project but was applied to ${project.path}"
         }
 
-        require(GradleVersion.current() >= GradleVersion.version("6.0")) {
-            "The plugin requires Gradle version 6.0+"
+        require(GradleVersion.current() >= GradleVersion.version("6.2")) {
+            "The plugin requires Gradle version 6.2+"
         }
 
         val registry = createRegistry(project)
@@ -203,11 +204,11 @@ class NexusPublishPlugin : Plugin<Project> {
         extension: NexusPublishExtension,
         registry: Provider<StagingRepositoryDescriptorRegistry>
     ): ArtifactRepository = when (publicationType) {
-        PublicationType.MAVEN -> project.theExtension<PublishingExtension>().repositories.maven {
+        PublicationType.MAVEN -> project.the<PublishingExtension>().repositories.maven {
             configureArtifactRepo(nexusRepo, project, extension, registry, false)
         }
 
-        PublicationType.IVY -> project.theExtension<PublishingExtension>().repositories.ivy {
+        PublicationType.IVY -> project.the<PublishingExtension>().repositories.ivy {
             configureArtifactRepo(nexusRepo, project, extension, registry, true)
             if (nexusRepo.ivyPatternLayout.isPresent) {
                 nexusRepo.ivyPatternLayout.get().let { this.patternLayout(it) }
@@ -250,7 +251,7 @@ class NexusPublishPlugin : Plugin<Project> {
         artifactRepo: ArtifactRepository,
         publicationType: PublicationType
     ) {
-        val publications = project.theExtension<PublishingExtension>().publications.withType(publicationType.gradleType)
+        val publications = project.the<PublishingExtension>().publications.withType(publicationType.gradleType)
         publications.configureEach {
             val publication = this
             val publishTask = project.tasks.named(
@@ -317,8 +318,3 @@ class NexusPublishPlugin : Plugin<Project> {
         }
     }
 }
-
-inline fun <reified T : Any> Project.theExtension(): T =
-    typeOf<T>().let {
-        this.extensions.findByType(it) ?: throw IllegalStateException("The plugion cannot be applied without the publishing plugin")
-    }

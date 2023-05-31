@@ -20,6 +20,7 @@ import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.artifacts.repositories.IvyPatternRepositoryLayout
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
@@ -40,14 +41,10 @@ open class NexusRepository @Inject constructor(@Input val name: String, project:
     val publicationType: Property<NexusPublishExtension.PublicationType> = project.objects.property<NexusPublishExtension.PublicationType>().convention(NexusPublishExtension.PublicationType.MAVEN)
 
     @Internal
-    val username = project.objects.property<String>().apply {
-        set(project.provider { project.findProperty("${name}Username") as? String })
-    }
+    val username = project.objects.property<String>().convention(project.providers.gradleProperty("${name}Username"))
 
     @Internal
-    val password = project.objects.property<String>().apply {
-        set(project.provider { project.findProperty("${name}Password") as? String })
-    }
+    val password = project.objects.property<String>().convention(project.providers.gradleProperty("${name}Password"))
 
     @Internal
     val allowInsecureProtocol = project.objects.property<Boolean>()
